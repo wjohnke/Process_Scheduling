@@ -84,7 +84,7 @@ TEST (round_robin, goodInputB) {
     ScheduleResult_t *sr = new ScheduleResult_t;
     dyn_array_t* pcbs = dyn_array_create(0,sizeof(ProcessControlBlock_t),NULL);
     memset(sr,0,sizeof(ScheduleResult_t));
-    // add PCBs now
+    // add PCBS now
     ProcessControlBlock_t data[3] = {
         [0] = {20,0,0},
         [1] = {5,0,0},
@@ -104,8 +104,65 @@ TEST (round_robin, goodInputB) {
     delete sr;
 
     score+=10;
-} 
+}
+/********** Additional Test Cases: Round Robin********/ 
+TEST (round_robin, NegativeQuantum) {
+	ScheduleResult_t *sr = new ScheduleResult_t;
+	dyn_array_t* pcbs = dyn_array_create(0, sizeof(ProcessControlBlock_t),NULL);
+	memset(sr,0,sizeof(ScheduleResult_t));
+	ProcessControlBlock_t data[3] = {
+       		[0] = {20,0,0},
+        	[1] = {5,0,0},
+        	[2] = {6,0,0}
+    	};
 
+   	dyn_array_push_back(pcbs,&data[2]);
+   	dyn_array_push_back(pcbs,&data[1]);
+   	dyn_array_push_back(pcbs,&data[0]);
+   	ASSERT_EQ(false,round_robin (pcbs,sr,-4));
+	dyn_array_destroy(pcbs);
+	delete sr;
+	score+=5;
+}
+
+TEST (round_robin, NegativeBurstTime) {
+        ScheduleResult_t *sr = new ScheduleResult_t;
+        dyn_array_t* pcbs = dyn_array_create(0, sizeof(ProcessControlBlock_t),NULL);
+        memset(sr,0,sizeof(ScheduleResult_t));
+        ProcessControlBlock_t data[3] = {
+                [0] = {-10,0,0},
+                [1] = {5,0,0},
+                [2] = {-6,0,0}
+        };
+
+        dyn_array_push_back(pcbs,&data[2]);
+        dyn_array_push_back(pcbs,&data[1]);
+        dyn_array_push_back(pcbs,&data[0]);
+        ASSERT_EQ(false,round_robin (pcbs,sr,QUANTUM));
+	dyn_array_destroy(pcbs);
+	delete sr;
+	score+=5;
+}
+
+TEST (round_robin, TooLargeQuantum) {
+        ScheduleResult_t *sr = new ScheduleResult_t;
+        dyn_array_t* pcbs = dyn_array_create(0, sizeof(ProcessControlBlock_t),NULL);
+        memset(sr,0,sizeof(ScheduleResult_t));
+        ProcessControlBlock_t data[3] = {
+                [0] = {20,0,0},
+                [1] = {5,0,0},
+                [2] = {6,0,0}
+        };
+
+        dyn_array_push_back(pcbs,&data[2]);
+        dyn_array_push_back(pcbs,&data[1]);
+        dyn_array_push_back(pcbs,&data[0]);
+        ASSERT_EQ(false,round_robin (pcbs,sr,10000000000000000));
+	dyn_array_destroy(pcbs);
+	delete sr;
+	score+=5;
+}
+/*********************************************/
 
 /*
  *  * * Priority  TEST CASES
@@ -130,6 +187,61 @@ TEST (priority, nullScheduleResult) {
 
     score+=5;
 }
+TEST (priority, badInputNegativePriority) {
+   	ScheduleResult_t *sr = new ScheduleResult_t;
+   	dyn_array_t* pcbs = dyn_array_create(0,sizeof(ProcessControlBlock_t),NULL);
+   	memset(sr,0,sizeof(ScheduleResult_t));
+	ProcessControlBlock_t data[4]={
+		[0] = {15,-8,0},
+		[1] = {10,1, 0},
+		[2] = {3, 3, 0},
+		[3] = {2, 2, 0}
+	};
+	dyn_array_push_back(pcbs, &data[3]);
+	dyn_array_push_back(pcbs, &data[2]);
+	dyn_array_push_back(pcbs, &data[1]);
+	dyn_array_push_back(pcbs, &data[0]);
+	ASSERT_EQ(false, priority(pcbs,sr);
+	delete sr;
+	dyn_array_destroy(pcbs);
+	score +=5;
+}
+
+TEST (priority, badInputEmptyPCBS) {
+        ScheduleResult_t *sr = new ScheduleResult_t;
+        dyn_array_t* pcbs = dyn_array_create(0,sizeof(ProcessControlBlock_t),NULL);
+        memset(sr,0,sizeof(ScheduleResult_t));
+        ProcessControlBlock_t data[2]={
+                [0] = NULL
+        };
+        dyn_array_push_back(pcbs, &data[0]);
+        ASSERT_EQ(false, priority(pcbs,sr);
+        delete sr;
+        dyn_array_destroy(pcbs);
+        score +=5;
+}
+
+TEST (priority, badInputNegativeBurstTime) {
+        ScheduleResult_t *sr = new ScheduleResult_t;
+        dyn_array_t* pcbs = dyn_array_create(0,sizeof(ProcessControlBlock_t),NULL);
+        memset(sr,0,sizeof(ScheduleResult_t));
+        ProcessControlBlock_t data[4]={
+                [0] = {-6,8,0},
+                [1] = {4,1, 0},
+                [2] = {10, 3, 0},
+                [3] = {-2, 2, 0}
+        };
+        dyn_array_push_back(pcbs, &data[3]);
+        dyn_array_push_back(pcbs, &data[2]);
+        dyn_array_push_back(pcbs, &data[1]);
+        dyn_array_push_back(pcbs, &data[0]);
+        ASSERT_EQ(false, priority(pcbs,sr);
+        delete sr;
+        dyn_array_destroy(pcbs);
+        score +=5;
+}
+
+
 
 TEST (priority, goodInputA) {
     ScheduleResult_t *sr = new ScheduleResult_t;
@@ -265,7 +377,59 @@ TEST (first_come_first_serve, goodInputB) {
 
     score+=20;
 }
-
+/*************** Additional Test Cases: First Come First Serve ************/
+TEST (first_come_first_serve, negativeBurstTimes){
+	ScheduleResult_t *sr = new ScheduleResult_t;
+	dyn_array_t* pcbs = dyn_array_create(0, sizeof(ProcessControlBlock_t), NULL);
+	memset(sr,0,sizeof(ScheduleResult_t));
+	
+	ProcessControlBlock_t data[4] = {
+	   [0]={-1,0,0},
+	   [1]={9,0,0},
+	   [2]={4,0,0},
+	   [3]={-10,0,0}
+	}
+        dyn_array_push_back(pcbs,&data[3]);
+   	dyn_array_push_back(pcbs,&data[2]);
+  	dyn_array_push_back(pcbs,&data[1]);
+   	dyn_array_push_back(pcbs,&data[0]);
+	ASSERT_EQ(false, first_come_first_serve(pcbs,sr));
+	dyn_array_destroy(pcbs);
+	delete sr;
+	score +=20;
+}
+TEST (first_come_first_serve, nonNullArrayEmptyPCBS){
+	ScheduleResult_t *sr = new ScheduleResult_t;
+        dyn_array_t* pcbs = dyn_array_create(0, sizeof(ProcessControlBlock_t), NULL);
+        memset(sr,0,sizeof(ScheduleResult_t));
+	ProcessControlBlock_t data[1]={
+	   [0]=NULL
+	}
+	dyn_array_push_back(pcbs, &data[0]);
+	ASSERT_EQ(false, first_come_first_serve(pcbs, sr));
+	dyn_array_destroy(pcbs);
+	delete sr;
+	score +=20;
+}
+TEST (first_come_first_serve, badInputAllFinishedPCBS){
+	ScheduleResult_t *sr = new ScheduleResult_t;
+    	dyn_array_t* pcbs = dyn_array_create(0,sizeof(ProcessControlBlock_t),NULL);
+    	memset(sr,0,sizeof(ScheduleResult_t));
+   	 // add PCBs now
+	ProcessControlBlock_t data[4] = {
+    		[0] = {0,0,1},
+       		[1] = {0,0,1},
+       		[2] = {0,0,1},
+       		[3] = {0,0,1},
+	};
+ 	dyn_array_push_back(pcbs,&data[3]);
+    	dyn_array_push_back(pcbs,&data[2]);
+    	dyn_array_push_back(pcbs,&data[1]);
+  	dyn_array_push_back(pcbs,&data[0]);
+      	bool res = first_come_first_serve (pcbs,sr);
+        ASSERT_EQ(false, res);
+}
+/**********************************************/
 
 /*
  * LOAD PROCESS CONTROL BLOCKS TEST CASES
@@ -338,6 +502,9 @@ TEST (load_process_control_blocks, fullFoundFile) {
 
     score+=10;
 }
+
+/******** Additional Test Cases: Load Process Control Blocks ****/
+TEST (load_process_control_blocks,
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
