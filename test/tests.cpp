@@ -6,6 +6,7 @@
 // Using a C library requires extern "C" to prevent function managling
 extern "C" {
 #include <dyn_array.h>
+#include <processing_scheduling.h>
 }
 
 
@@ -125,20 +126,23 @@ TEST (round_robin, NegativeQuantum) {
 	score+=5;
 }
 
-TEST (round_robin, NegativeBurstTime) {
+TEST (round_robin, badInputAllFinishedPCBS) {
         ScheduleResult_t *sr = new ScheduleResult_t;
         dyn_array_t* pcbs = dyn_array_create(0, sizeof(ProcessControlBlock_t),NULL);
         memset(sr,0,sizeof(ScheduleResult_t));
         ProcessControlBlock_t data[3] = {
-                [0] = {-10,0,0},
-                [1] = {5,0,0},
-                [2] = {-6,0,0}
+                [0] = {10,0,1},
+                [1] = {5,0,1},
+                [2] = {6,0,1}
         };
 
         dyn_array_push_back(pcbs,&data[2]);
         dyn_array_push_back(pcbs,&data[1]);
         dyn_array_push_back(pcbs,&data[0]);
         ASSERT_EQ(false,round_robin (pcbs,sr,QUANTUM));
+		ASSERT_EQ(0,sr->average_wall_clock_time);
+		ASSERT_EQ(0,sr->average_latency_time);
+		ASSERT_EQ(0,sr->total_run_time);
 	dyn_array_destroy(pcbs);
 	delete sr;
 	score+=5;
@@ -187,55 +191,66 @@ TEST (priority, nullScheduleResult) {
 
     score+=5;
 }
-TEST (priority, badInputNegativePriority) {
+TEST (priority, badInputAllFinishedPCBS) {
    	ScheduleResult_t *sr = new ScheduleResult_t;
    	dyn_array_t* pcbs = dyn_array_create(0,sizeof(ProcessControlBlock_t),NULL);
    	memset(sr,0,sizeof(ScheduleResult_t));
 	ProcessControlBlock_t data[4]={
-		[0] = {15,-8,0},
-		[1] = {10,1, 0},
-		[2] = {3, 3, 0},
-		[3] = {2, 2, 0}
+		[0] = {15,8,1},
+		[1] = {10,1, 1},
+		[2] = {3, 3, 1},
+		[3] = {2, 2, 1}
 	};
 	dyn_array_push_back(pcbs, &data[3]);
 	dyn_array_push_back(pcbs, &data[2]);
 	dyn_array_push_back(pcbs, &data[1]);
 	dyn_array_push_back(pcbs, &data[0]);
-	ASSERT_EQ(false, priority(pcbs,sr);
+	ASSERT_EQ(false, priority(pcbs,sr));
+	ASSERT_EQ(0,sr->average_wall_clock_time);
+	ASSERT_EQ(0,sr->average_latency_time);
+	ASSERT_EQ(0,sr->total_run_time);
 	delete sr;
 	dyn_array_destroy(pcbs);
 	score +=5;
 }
 
-TEST (priority, badInputEmptyPCBS) {
+TEST (priority, badInputZeroBurstTime) {
         ScheduleResult_t *sr = new ScheduleResult_t;
         dyn_array_t* pcbs = dyn_array_create(0,sizeof(ProcessControlBlock_t),NULL);
         memset(sr,0,sizeof(ScheduleResult_t));
         ProcessControlBlock_t data[2]={
-                [0] = NULL
+                [0] = {0,0,0},
+				[1] = {0,0,0}
         };
         dyn_array_push_back(pcbs, &data[0]);
-        ASSERT_EQ(false, priority(pcbs,sr);
+		dyn_array_push_back(pcbs, &data[1]);
+        ASSERT_EQ(false, priority(pcbs,sr));
+		ASSERT_EQ(0,sr->average_wall_clock_time);
+		ASSERT_EQ(0,sr->average_latency_time);
+		ASSERT_EQ(0,sr->total_run_time);
         delete sr;
         dyn_array_destroy(pcbs);
         score +=5;
 }
 
-TEST (priority, badInputNegativeBurstTime) {
+TEST (priority, goodInputNonZeroResults) {
         ScheduleResult_t *sr = new ScheduleResult_t;
         dyn_array_t* pcbs = dyn_array_create(0,sizeof(ProcessControlBlock_t),NULL);
         memset(sr,0,sizeof(ScheduleResult_t));
         ProcessControlBlock_t data[4]={
-                [0] = {-6,8,0},
+                [0] = {6,8,0},
                 [1] = {4,1, 0},
                 [2] = {10, 3, 0},
-                [3] = {-2, 2, 0}
+                [3] = {2, 2, 0}
         };
         dyn_array_push_back(pcbs, &data[3]);
         dyn_array_push_back(pcbs, &data[2]);
         dyn_array_push_back(pcbs, &data[1]);
         dyn_array_push_back(pcbs, &data[0]);
-        ASSERT_EQ(false, priority(pcbs,sr);
+        ASSERT_EQ(true, priority(pcbs,sr));
+		ASSERT_NE(0,sr->average_wall_clock_time);
+		ASSERT_NE(0,sr->average_latency_time);
+		ASSERT_NE(0,sr->total_run_time);
         delete sr;
         dyn_array_destroy(pcbs);
         score +=5;
@@ -378,35 +393,41 @@ TEST (first_come_first_serve, goodInputB) {
     score+=20;
 }
 /*************** Additional Test Cases: First Come First Serve ************/
-TEST (first_come_first_serve, negativeBurstTimes){
+TEST (first_come_first_serve, goodInputNonZeroResults){
 	ScheduleResult_t *sr = new ScheduleResult_t;
 	dyn_array_t* pcbs = dyn_array_create(0, sizeof(ProcessControlBlock_t), NULL);
 	memset(sr,0,sizeof(ScheduleResult_t));
 	
 	ProcessControlBlock_t data[4] = {
-	   [0]={-1,0,0},
-	   [1]={9,0,0},
-	   [2]={4,0,0},
-	   [3]={-10,0,0}
-	}
+	   [0]={8,0,0},
+	   [1]={4,0,0},
+	   [2]={3,0,0},
+	   [3]={7,0,0}
+	};
         dyn_array_push_back(pcbs,&data[3]);
    	dyn_array_push_back(pcbs,&data[2]);
   	dyn_array_push_back(pcbs,&data[1]);
    	dyn_array_push_back(pcbs,&data[0]);
-	ASSERT_EQ(false, first_come_first_serve(pcbs,sr));
+	ASSERT_EQ(true, first_come_first_serve(pcbs,sr));
+	ASSERT_NE(0,sr->average_wall_clock_time);
+    ASSERT_NE(0,sr->average_latency_time);
+    ASSERT_NE(0,sr->total_run_time);
 	dyn_array_destroy(pcbs);
 	delete sr;
 	score +=20;
 }
-TEST (first_come_first_serve, nonNullArrayEmptyPCBS){
+TEST (first_come_first_serve, badInputZeroBurstTime){
 	ScheduleResult_t *sr = new ScheduleResult_t;
         dyn_array_t* pcbs = dyn_array_create(0, sizeof(ProcessControlBlock_t), NULL);
         memset(sr,0,sizeof(ScheduleResult_t));
 	ProcessControlBlock_t data[1]={
-	   [0]=NULL
-	}
+		[0] = {0,0,0}
+	};
 	dyn_array_push_back(pcbs, &data[0]);
 	ASSERT_EQ(false, first_come_first_serve(pcbs, sr));
+	ASSERT_EQ(0, sr->average_wall_clock_time);
+	ASSERT_EQ(0, sr->average_latency_time);
+	ASSERT_EQ(0, sr->total_run_time);
 	dyn_array_destroy(pcbs);
 	delete sr;
 	score +=20;
@@ -417,17 +438,21 @@ TEST (first_come_first_serve, badInputAllFinishedPCBS){
     	memset(sr,0,sizeof(ScheduleResult_t));
    	 // add PCBs now
 	ProcessControlBlock_t data[4] = {
-    		[0] = {0,0,1},
-       		[1] = {0,0,1},
-       		[2] = {0,0,1},
-       		[3] = {0,0,1},
+    		[0] = {1,0,1},
+       		[1] = {4,8,1},
+       		[2] = {8,2,1},
+       		[3] = {5,4,1},
 	};
  	dyn_array_push_back(pcbs,&data[3]);
-    	dyn_array_push_back(pcbs,&data[2]);
-    	dyn_array_push_back(pcbs,&data[1]);
+	dyn_array_push_back(pcbs,&data[2]);
+    dyn_array_push_back(pcbs,&data[1]);
   	dyn_array_push_back(pcbs,&data[0]);
-      	bool res = first_come_first_serve (pcbs,sr);
-        ASSERT_EQ(false, res);
+    ASSERT_EQ(false, first_come_first_serve (pcbs,sr));
+	ASSERT_EQ(0, sr->average_wall_clock_time);
+	ASSERT_EQ(0, sr->average_latency_time);
+	ASSERT_EQ(0, sr->total_run_time);
+	dyn_array_destroy(pcbs);
+	delete sr;
 }
 /**********************************************/
 
@@ -472,7 +497,7 @@ TEST (load_process_control_blocks, incorrectPCBFoundFile) {
     write(fd,pcbs,5 * sizeof(uint32_t)*2);
     close(fd);
     dyn_array_t* da = load_process_control_blocks (fname);
-    ASSERT_EQ(da,(dyn_array_t*)NULL);
+    ASSERT_EQ((dyn_array_t*)NULL,da);
 
     score+=5;
 }
@@ -504,7 +529,7 @@ TEST (load_process_control_blocks, fullFoundFile) {
 }
 
 /******** Additional Test Cases: Load Process Control Blocks ****/
-TEST (load_process_control_blocks,
+
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
