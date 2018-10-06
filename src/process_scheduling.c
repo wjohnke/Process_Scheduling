@@ -25,7 +25,7 @@ bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result) 
 		//for(int i=0; i<queueSize; i++){
 			
 			dyn_array_extract_back(ready_queue, (void *) &current);
-			numProcesses++;
+			numProcesses++;  //Works because only ever pulling off ready queue once for each PCB.
 			waitTime+=totalRunTime;
 			//Execute current Process until Burst time = 0
 			if(current.remaining_burst_time>0 && !current.started){
@@ -49,19 +49,85 @@ bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result) 
 
 }
 
+int compare(const void * first, const void * second){
+	return (((ProcessControlBlock_t *) first)->priority > ((ProcessControlBlock_t *)second)->priority) ?  -1 : 
+		   ((((ProcessControlBlock_t *)first)->priority < ((ProcessControlBlock_t *)second)->priority) ?  1 :
+		   -1 );
+	
+}
+
 bool priority(dyn_array_t *ready_queue, ScheduleResult_t *result) {
 	if(ready_queue!=NULL && result!=NULL){
-			
+		/*
+		size_t totalRunTime = 0;
+		float waitTime =0;
+		size_t numProcesses=0;
+		size_t totalWallClockTime=0;
+		ProcessControlBlock_t current;
+		*/
+		//Theoretically this sort would be inside the while loop, to constantly be sorting
+		//the array as it is taking processes, as the priorities may change, but for simplicity's sake, it's outside
+		if(!dyn_array_sort(ready_queue, &compare)) return false;
+		return first_come_first_serve(ready_queue, result);
+		
+		/*
+		while(!dyn_array_empty(ready_queue)){
+			executing same instructions as FCFS, simplified it.
+		}
+		*/
 	}
    return false;   
 }
 
 bool round_robin(dyn_array_t *ready_queue, ScheduleResult_t *result, size_t quantum) {
-	if(ready_queue!=NULL && result!=NULL && quantum>0  /*Add case for quantum too large*/){
-		
+	
+	size_t totalRunTime = 0;
+	float waitTime =0;
+	size_t numProcesses=0;
+	size_t totalWallClockTime=0;
+	ProcessControlBlock_t current;
+	
+	if(ready_queue!=NULL && result!=NULL && quantum>0 && quantum <1000){
+		while(!dyn_array_empty(ready_queue)){
+			dyn_array_extract_back(ready_queue, (void *) &current);
+			 //Gets max amount of PCBs handled
+			numProcesses = (numProcesses < dyn_array_size(ready_queue)+1) ? dyn_array_size(ready_queue) +1 : numProcesses;
+			if(current.remaining_burst_time>0){
+				if(!current.started){
+					current.started=true;
+					waitTime+=totalRunTime;
+				}
+				else waitTime+= totalRunTime-current.timeLastScheduled; //Account for time spent waiting 
+				size_t timeElapsed=0;
+				//Run new time environment until quantum is reached
+				while(timeElapsed<quantum){
+					virtual_cpu(&current);
+					timeElapsed++;
+					totalRunTime++;
+					if(current.remaining_burst_time<=0){
+						break;
+					}
+				}
+				//If not finished, revert back to wait mode & set so it is not currently started, put on ready queue
+				if(current.remaining_burst_time>0){
+					//Add timestamp for when it was last scheduled to help calculate waiting time
+					current.timeLastScheduled=totalRunTime;
+					if(!dyn_array_push_front(ready_queue, (void *) &current) ) return false;
+				}
+				else{
+					totalWallClockTime+=totalRunTime;
+				}
+			}
+			else return false; //Shouldn't have pulled PCB off queue with burst time <=0
+		}
+		result->total_run_time=(float)totalRunTime;
+		result->average_latency_time=(float)waitTime/numProcesses;
+		result->average_wall_clock_time=(float)totalWallClockTime/numProcesses;
+		if(result->total_run_time>0) return true; 
 	}
     return false;
 }
+
 
 dyn_array_t *load_process_control_blocks(const char *input_file) {
     if(input_file!=NULL && *input_file!='\0'){

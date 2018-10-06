@@ -61,9 +61,9 @@ TEST (round_robin, goodInputA) {
     memset(sr,0,sizeof(ScheduleResult_t));
     // add PCBs now
     ProcessControlBlock_t data[3] = {
-        [0] = {24,0,0},
-        [1] = {3,0,0},
-        [2] = {3,0,0}
+        [0] = {24,0,0,0},
+        [1] = {3,0,0,0},
+        [2] = {3,0,0,0}
     };
     // back loading dyn_array, pull from the back
     dyn_array_push_back(pcbs,&data[2]);
@@ -87,9 +87,9 @@ TEST (round_robin, goodInputB) {
     memset(sr,0,sizeof(ScheduleResult_t));
     // add PCBS now
     ProcessControlBlock_t data[3] = {
-        [0] = {20,0,0},
-        [1] = {5,0,0},
-        [2] = {6,0,0}
+        [0] = {20,0,0,0},
+        [1] = {5,0,0,0},
+        [2] = {6,0,0,0}
     };
     // back loading dyn_array, pull from the back
     dyn_array_push_back(pcbs,&data[2]);
@@ -107,33 +107,37 @@ TEST (round_robin, goodInputB) {
     score+=10;
 }
 /********** Additional Test Cases: Round Robin********/ 
-TEST (round_robin, NegativeQuantum) {
+TEST (round_robin, GoodInputSmallQuantum) {
 	ScheduleResult_t *sr = new ScheduleResult_t;
 	dyn_array_t* pcbs = dyn_array_create(0, sizeof(ProcessControlBlock_t),NULL);
 	memset(sr,0,sizeof(ScheduleResult_t));
-	ProcessControlBlock_t data[3] = {
-       		[0] = {20,0,0},
-        	[1] = {5,0,0},
-        	[2] = {6,0,0}
+	ProcessControlBlock_t data[5] = {
+       		[0] = {20,0,0,0},
+        	[1] = {5,0,0,0},
+        	[2] = {6,0,0,0},
+			[3] = {4,0,0,0},
+			[4] = {5,1,0,0}
     	};
 
+	dyn_array_push_back(pcbs,&data[4]);	
+	dyn_array_push_back(pcbs,&data[3]);
    	dyn_array_push_back(pcbs,&data[2]);
    	dyn_array_push_back(pcbs,&data[1]);
    	dyn_array_push_back(pcbs,&data[0]);
-   	ASSERT_EQ(false,round_robin (pcbs,sr,-4));
+   	ASSERT_EQ(true,round_robin (pcbs,sr,1));
 	dyn_array_destroy(pcbs);
 	delete sr;
 	score+=5;
 }
 
-TEST (round_robin, badInputAllFinishedPCBS) {
+TEST (round_robin, badInputZeroBurstTime) {
         ScheduleResult_t *sr = new ScheduleResult_t;
         dyn_array_t* pcbs = dyn_array_create(0, sizeof(ProcessControlBlock_t),NULL);
         memset(sr,0,sizeof(ScheduleResult_t));
         ProcessControlBlock_t data[3] = {
-                [0] = {10,0,1},
-                [1] = {5,0,1},
-                [2] = {6,0,1}
+                [0] = {0,0,1,0},
+                [1] = {0,0,0,0},
+                [2] = {6,0,1,0}
         };
 
         dyn_array_push_back(pcbs,&data[2]);
@@ -153,9 +157,9 @@ TEST (round_robin, TooLargeQuantum) {
         dyn_array_t* pcbs = dyn_array_create(0, sizeof(ProcessControlBlock_t),NULL);
         memset(sr,0,sizeof(ScheduleResult_t));
         ProcessControlBlock_t data[3] = {
-                [0] = {20,0,0},
-                [1] = {5,0,0},
-                [2] = {6,0,0}
+                [0] = {20,0,0,0},
+                [1] = {5,0,0,0},
+                [2] = {6,0,0,0}
         };
 
         dyn_array_push_back(pcbs,&data[2]);
@@ -196,10 +200,10 @@ TEST (priority, badInputAllFinishedPCBS) {
    	dyn_array_t* pcbs = dyn_array_create(0,sizeof(ProcessControlBlock_t),NULL);
    	memset(sr,0,sizeof(ScheduleResult_t));
 	ProcessControlBlock_t data[4]={
-		[0] = {15,8,1},
-		[1] = {10,1, 1},
-		[2] = {3, 3, 1},
-		[3] = {2, 2, 1}
+		[0] = {15,8,1,0},
+		[1] = {10,1, 1,0},
+		[2] = {3, 3, 1,0},
+		[3] = {2, 2, 1,0}
 	};
 	dyn_array_push_back(pcbs, &data[3]);
 	dyn_array_push_back(pcbs, &data[2]);
@@ -219,8 +223,8 @@ TEST (priority, badInputZeroBurstTime) {
         dyn_array_t* pcbs = dyn_array_create(0,sizeof(ProcessControlBlock_t),NULL);
         memset(sr,0,sizeof(ScheduleResult_t));
         ProcessControlBlock_t data[2]={
-                [0] = {0,0,0},
-				[1] = {0,0,0}
+                [0] = {0,0,0,0},
+				[1] = {0,0,0,0}
         };
         dyn_array_push_back(pcbs, &data[0]);
 		dyn_array_push_back(pcbs, &data[1]);
@@ -238,10 +242,10 @@ TEST (priority, goodInputNonZeroResults) {
         dyn_array_t* pcbs = dyn_array_create(0,sizeof(ProcessControlBlock_t),NULL);
         memset(sr,0,sizeof(ScheduleResult_t));
         ProcessControlBlock_t data[4]={
-                [0] = {6,8,0},
-                [1] = {4,1, 0},
-                [2] = {10, 3, 0},
-                [3] = {2, 2, 0}
+                [0] = {6,8,0,0},
+                [1] = {4,1, 0,0},
+                [2] = {10, 3, 0,0},
+                [3] = {2, 2, 0,0}
         };
         dyn_array_push_back(pcbs, &data[3]);
         dyn_array_push_back(pcbs, &data[2]);
@@ -264,9 +268,9 @@ TEST (priority, goodInputA) {
     memset(sr,0,sizeof(ScheduleResult_t));
     // add PCBs now
     ProcessControlBlock_t data[3] = {
-        [0] = {24,3,0},
-        [1] = {3,1,0},
-        [2] = {3,2,0}
+        [0] = {24,3,0,0},
+        [1] = {3,1,0,0},
+        [2] = {3,2,0,0}
     };
     // back loading dyn_array, pull from the back
     dyn_array_push_back(pcbs,&data[2]);
@@ -290,11 +294,11 @@ TEST (priority, goodInputB) {
     memset(sr,0,sizeof(ScheduleResult_t));
     // add PCBs now
     ProcessControlBlock_t data[5] = {
-        [0] = {10,3,0},
-        [1] = {1,1,0},
-        [2] = {2,4,0},
-        [3] = {1,5,0},
-        [4] = {5,2,0},
+        [0] = {10,3,0,0},
+        [1] = {1,1,0,0},
+        [2] = {2,4,0,0},
+        [3] = {1,5,0,0},
+        [4] = {5,2,0,0},
     };
     // back loading dyn_array, pull from the back
     dyn_array_push_back(pcbs,&data[4]);
@@ -345,9 +349,9 @@ TEST (first_come_first_serve, goodInputA) {
     memset(sr,0,sizeof(ScheduleResult_t));
     // add PCBs now
     ProcessControlBlock_t data[3] = {
-        [0] = {24,0,0},
-        [1] = {3,0,0},
-        [2] = {3,0,0}
+        [0] = {24,0,0,0},
+        [1] = {3,0,0,0},
+        [2] = {3,0,0,0}
     };
     // back loading dyn_array, pull from the back
     dyn_array_push_back(pcbs,&data[2]);
@@ -371,10 +375,10 @@ TEST (first_come_first_serve, goodInputB) {
     memset(sr,0,sizeof(ScheduleResult_t));
     // add PCBs now
     ProcessControlBlock_t data[4] = {
-        [0] = {6,0,0},
-        [1] = {8,0,0},
-        [2] = {7,0,0},
-        [3] = {3,0,0},
+        [0] = {6,0,0,0},
+        [1] = {8,0,0,0},
+        [2] = {7,0,0,0},
+        [3] = {3,0,0,0},
     };
     // back loading dyn_array, pull from the back
     dyn_array_push_back(pcbs,&data[3]);
@@ -399,10 +403,10 @@ TEST (first_come_first_serve, goodInputNonZeroResults){
 	memset(sr,0,sizeof(ScheduleResult_t));
 	
 	ProcessControlBlock_t data[4] = {
-	   [0]={8,0,0},
-	   [1]={4,0,0},
-	   [2]={3,0,0},
-	   [3]={7,0,0}
+	   [0]={8,0,0,0},
+	   [1]={4,0,0,0},
+	   [2]={3,0,0,0},
+	   [3]={7,0,0,0}
 	};
         dyn_array_push_back(pcbs,&data[3]);
    	dyn_array_push_back(pcbs,&data[2]);
@@ -421,7 +425,7 @@ TEST (first_come_first_serve, badInputZeroBurstTime){
         dyn_array_t* pcbs = dyn_array_create(0, sizeof(ProcessControlBlock_t), NULL);
         memset(sr,0,sizeof(ScheduleResult_t));
 	ProcessControlBlock_t data[1]={
-		[0] = {0,0,0}
+		[0] = {0,0,0,0}
 	};
 	dyn_array_push_back(pcbs, &data[0]);
 	ASSERT_EQ(false, first_come_first_serve(pcbs, sr));
@@ -438,10 +442,10 @@ TEST (first_come_first_serve, badInputAllFinishedPCBS){
     	memset(sr,0,sizeof(ScheduleResult_t));
    	 // add PCBs now
 	ProcessControlBlock_t data[4] = {
-    		[0] = {1,0,1},
-       		[1] = {4,8,1},
-       		[2] = {8,2,1},
-       		[3] = {5,4,1},
+    		[0] = {1,0,1,0},
+       		[1] = {4,8,1,0},
+       		[2] = {8,2,1,0},
+       		[3] = {5,4,1,0},
 	};
  	dyn_array_push_back(pcbs,&data[3]);
 	dyn_array_push_back(pcbs,&data[2]);

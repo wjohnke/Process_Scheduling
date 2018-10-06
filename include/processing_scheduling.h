@@ -14,6 +14,7 @@ typedef struct {
     uint32_t remaining_burst_time;  // the remaining burst of the pcb
     uint32_t priority;				      // The priority of the task
     bool started;                   // If it has been activated on virtual CPU
+	uint32_t timeLastScheduled;   //Additional field - account for the last synchronized unit of time it was scheduled on cpu
 } ProcessControlBlock_t;			      // you may or may not need to add more elements
 
 typedef struct {
