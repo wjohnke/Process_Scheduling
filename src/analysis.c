@@ -15,8 +15,35 @@ int main(int argc, char **argv) {
         printf("%s <pcb file> <schedule algorithm> [quantum]\n", argv[0]);
         return EXIT_FAILURE;
     }
-    abort();  // replace me with implementation.
+    dyn_array_t * dyn_array = load_process_control_blocks(argv[1]);
+    if (dyn_array==NULL)return EXIT_FAILURE;
 
 
+    ScheduleResult_t* result = (ScheduleResult_t*) malloc(sizeof(ScheduleResult_t));
+    result->average_latency_time = 0;
+    result->average_wall_clock_time = 0;
+    result-> total_run_time = 0;
+
+    if(strcmp("FCFS", argv[2]) == 0 ){
+    	printf("FCFS executing\n");
+    	first_come_first_serve(dyn_array, result);
+    }
+    if(strcmp("P", argv[2]) == 0){
+    	printf("Priority executing\n");
+    	priority(dyn_array, result);
+    }
+    if(argc>3){
+    	if(strcmp("RR", argv[2])==0){
+		size_t quantum=(size_t)argv[3];
+		printf("Round Robin executing\n");
+		round_robin(dyn_array,result, quantum);
+    	}
+    }
+
+    printf("Average Latency Time: %f\n", result->average_latency_time);
+    printf("Average Wall Clock Time: %f\n", result->average_wall_clock_time);
+    printf("Total Run Time: %lu\n", result-> total_run_time);
+    dyn_array_destroy(dyn_array);
+    free(result);
     return EXIT_SUCCESS;
 }

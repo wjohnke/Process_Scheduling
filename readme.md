@@ -24,3 +24,15 @@ Note:
     ---------------------------------------------------------------------------
     Add your scheduling algorithm analysis below this line in a readable format. 
     ---------------------------------------------------------------------------
+
+Priority executing
+Average Latency Time: 14.750000
+Average Wall Clock Time: 24.750000
+Total Run Time: 40
+
+FCFS executing
+Average Latency Time: 15.250000
+Average Wall Clock Time: 25.250000
+Total Run Time: 40
+
+
