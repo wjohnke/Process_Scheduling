@@ -26,7 +26,7 @@ Note:
     ---------------------------------------------------------------------------
 
 Priority executing
-
+------------------------
 Average Latency Time: 14.750000
 
 Average Wall Clock Time: 24.750000
@@ -34,10 +34,18 @@ Average Wall Clock Time: 24.750000
 Total Run Time: 40
 
 FCFS executing
-
+-----------------------
 Average Latency Time: 15.250000
 
 Average Wall Clock Time: 25.250000
+
+Total Run Time: 40
+
+Round Robin executing
+-----------------------
+Average Latency Time: 19.250000
+
+Average Wall Clock Time: 29.250000
 
 Total Run Time: 40
 

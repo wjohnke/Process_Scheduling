@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
     }
     if(argc>3){
     	if(strcmp("RR", argv[2])==0){
-		size_t quantum=(size_t)argv[3];
+		size_t quantum = (size_t)atoi(argv[3]);
 		printf("Round Robin executing\n");
 		round_robin(dyn_array,result, quantum);
     	}
