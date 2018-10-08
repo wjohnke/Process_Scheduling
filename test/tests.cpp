@@ -170,6 +170,94 @@ TEST (round_robin, TooLargeQuantum) {
 	delete sr;
 	score+=5;
 }
+
+TEST (round_robin, pcbBINFile){
+	ScheduleResult_t *sr = new ScheduleResult_t;
+    dyn_array_t* pcbs = dyn_array_create(0,sizeof(ProcessControlBlock_t),NULL);
+    memset(sr,0,sizeof(ScheduleResult_t));
+    // add PCBS now
+    ProcessControlBlock_t data[30] = {
+        [0] = {14,0,0,0},
+        [1] = {2,0,0,0},
+        [2] = {13,0,0,0},
+		[3] = {11,0,0,0},
+        [4] = {9,0,0,0},
+        [5] = {11,0,0,0},
+		[6] = {2,0,0,0},
+        [7] = {13,0,0,0},
+        [8] = {10,0,0,0},
+		[9] = {2,0,0,0},
+        [10] = {3,0,0,0},
+        [11] = {8,0,0,0},
+		[12] = {6,0,0,0},
+        [13] = {5,0,0,0},
+        [14] = {9,0,0,0},
+		[15] = {2,0,0,0},
+        [16] = {1,0,0,0},
+        [17] = {7,0,0,0},
+		[18] = {8,0,0,0},
+        [19] = {2,0,0,0},
+        [20] = {12,0,0,0},
+		[21] = {9,0,0,0},
+        [22] = {13,0,0,0},
+        [23] = {10,0,0,0},
+		[24] = {3,0,0,0},
+        [25] = {6,0,0,0},
+        [26] = {3,0,0,0},
+		[27] = {14,0,0,0},
+        [28] = {8,0,0,0},
+        [29] = {11,0,0,0},
+    };
+    // back loading dyn_array, pull from the back
+	dyn_array_push_back(pcbs,&data[29]);
+    dyn_array_push_back(pcbs,&data[28]);		
+    dyn_array_push_back(pcbs,&data[27]);
+	dyn_array_push_back(pcbs,&data[26]);
+    dyn_array_push_back(pcbs,&data[25]);		
+    dyn_array_push_back(pcbs,&data[24]);
+	dyn_array_push_back(pcbs,&data[23]);
+    dyn_array_push_back(pcbs,&data[22]);		
+    dyn_array_push_back(pcbs,&data[21]);
+	dyn_array_push_back(pcbs,&data[20]);
+    dyn_array_push_back(pcbs,&data[19]);		
+    dyn_array_push_back(pcbs,&data[18]);
+	dyn_array_push_back(pcbs,&data[17]);
+    dyn_array_push_back(pcbs,&data[16]);		
+    dyn_array_push_back(pcbs,&data[15]);
+	dyn_array_push_back(pcbs,&data[14]);
+    dyn_array_push_back(pcbs,&data[13]);		
+    dyn_array_push_back(pcbs,&data[12]);
+	dyn_array_push_back(pcbs,&data[11]);
+    dyn_array_push_back(pcbs,&data[10]);		
+    dyn_array_push_back(pcbs,&data[9]);
+	dyn_array_push_back(pcbs,&data[8]);
+    dyn_array_push_back(pcbs,&data[7]);		
+    dyn_array_push_back(pcbs,&data[6]);
+	dyn_array_push_back(pcbs,&data[5]);
+    dyn_array_push_back(pcbs,&data[4]);		
+    dyn_array_push_back(pcbs,&data[3]);
+    dyn_array_push_back(pcbs,&data[2]);
+    dyn_array_push_back(pcbs,&data[1]);		
+    dyn_array_push_back(pcbs,&data[0]);	
+    bool res = round_robin (pcbs,sr,QUANTUM);	
+    ASSERT_EQ(true,res);
+	/**/
+    float answers[3] = {148.533340,140.966660,227};
+    ASSERT_FLOAT_EQ(answers[0],sr->average_wall_clock_time);
+    ASSERT_EQ(answers[1],sr->average_latency_time);
+    ASSERT_EQ(answers[2],sr->total_run_time);
+	/*
+	printf("\n%f", sr->average_wall_clock_time);
+	printf("\n%lu", sr->total_run_time);
+	printf("\n%f", sr->average_latency_time);
+	*/
+    dyn_array_destroy(pcbs);
+    delete sr;
+
+    score+=10;
+	
+}
+
 /*********************************************/
 
 /*
@@ -533,6 +621,7 @@ TEST (load_process_control_blocks, fullFoundFile) {
 }
 
 /******** Additional Test Cases: Load Process Control Blocks ****/
+
 
 
 int main(int argc, char **argv) {

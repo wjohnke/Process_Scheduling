@@ -25,28 +25,30 @@ Note:
     Add your scheduling algorithm analysis below this line in a readable format. 
     ---------------------------------------------------------------------------
 
+Round Robin executing
+-------------------------------------
+
+Average Latency Time: 138.100006
+
+Average Wall Clock Time: 145.666672
+
+Total Run Time: 227
+
 Priority executing
-------------------------
-Average Latency Time: 14.750000
+------------------------------------
 
-Average Wall Clock Time: 24.750000
+Average Latency Time: 111.199997
 
-Total Run Time: 40
+Average Wall Clock Time: 118.766670
+
+Total Run Time: 227
 
 FCFS executing
------------------------
-Average Latency Time: 15.250000
+--------------------------------
 
-Average Wall Clock Time: 25.250000
+Average Latency Time: 108.233330
 
-Total Run Time: 40
+Average Wall Clock Time: 115.800003
 
-Round Robin executing
------------------------
-Average Latency Time: 19.250000
-
-Average Wall Clock Time: 29.250000
-
-Total Run Time: 40
-
+Total Run Time: 227
 

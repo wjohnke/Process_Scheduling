@@ -134,7 +134,7 @@ dyn_array_t *load_process_control_blocks(const char *input_file) {
 		
 		int fileDesc = open(input_file, O_RDONLY);
 		if(fileDesc<0){
-			close(fileDesc);
+			//close(fileDesc);
 			return NULL;
 		}
 		uint32_t numPCB;
@@ -150,9 +150,9 @@ dyn_array_t *load_process_control_blocks(const char *input_file) {
 			if(read(fileDesc,&(pcb[i].priority),sizeof(uint32_t))<=0) return NULL;
 		}
 		
-		dyn_array_t * array = dyn_array_import((void * )pcb, sizeof(numPCB), sizeof(ProcessControlBlock_t),NULL);
+		dyn_array_t * array = dyn_array_import((void * )pcb, numPCB, sizeof(ProcessControlBlock_t),NULL);
 		free(pcb);
-		close(fileDesc);
+		if(fileDesc>=0) close(fileDesc);
 		return array;
 	}
     return NULL;
